@@ -3,10 +3,12 @@ use feature qw(say);
 use IO::Socket::INET;
 use Parallel::Prefork;
 
+our $EOL = "\015\012";
+
 my $server = IO::Socket::INET->new(
-    Listen => 5,
-    Proto => 'tcp',
-    Reuse => 1,
+    Listen    => 5,
+    Proto     => 'tcp',
+    Reuse     => 1,
     LocalAddr => 'localhost',
     LocalPort => 8888,
 ) or die "Could not create a socket: $!";
@@ -14,13 +16,14 @@ my $server = IO::Socket::INET->new(
 $server->autoflush(1);
 $server->listen;
 
-my $pm = Parallel::Prefork->new({
-    max_workers => 3,
-    trap_signals => {
-        TERM => 'TERM',
-        HUP => 'TERM',
-    },
-});
+my $pm = Parallel::Prefork->new(
+    {   max_workers  => 3,
+        trap_signals => {
+            TERM => 'TERM',
+            HUP  => 'TERM',
+        },
+    }
+);
 
 while ($pm->signal_received ne 'TERM') {
     $pm->start and next;
@@ -41,13 +44,12 @@ while ($pm->signal_received ne 'TERM') {
 
 $pm->wait_all_children;
 
-
 sub handle_connection {
     my $sock = shift;
     while (my $input = $sock->getline) {
         $input =~ s/\R//sg;
         my $res = handle_input($input);
-        syswrite $sock, "[PID $$] Response: $res\n";
+        syswrite $sock, "[PID $$] Response: ${res}${EOL}";
         last if $input =~ /^bye/i;
     }
 }
