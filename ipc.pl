@@ -32,7 +32,7 @@ else {         # Child process
 
     say "[Child $$] Booted";
 
-    my $line = <$r>;
+    my $line = $r->getline;
     chomp $line;
     say "[Child $$] Got: $line";
 
