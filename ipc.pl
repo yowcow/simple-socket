@@ -36,8 +36,7 @@ else {         # Child process
     chomp $line;
     say "[Child $$] Got: $line";
 
-    close $r
-        or die "close reader handle failed: $!";
+    close $r or die "close reader handle failed: $!";
 
     say "[Child $$] Finished";
     exit 0;
